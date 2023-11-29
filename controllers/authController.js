@@ -7,29 +7,32 @@ import { SECRET_KEY } from "../config.js";
 
 const generateToken = (id, username, roles) => {
    const payload = { id, username, roles }
-   return jwt.sign(payload, SECRET_KEY, { expiresIn: "2 days" })
+   return jwt.sign(payload, SECRET_KEY, { expiresIn: "2h" })
+}
+
+function errorHandler(req, res) {
+   /////////----ОБРАБОТЧИК ОШИБОК------///////////
+   //Получаю ошибки
+   const errors = validationResult(req)
+   if (!errors.isEmpty()) {
+
+      //Пустой массив куда буду складывать сообщения ошибок
+      let errorList = []
+
+      //Перебор ошибок, вытаскиваю сообщения из них и помещаю в массив
+      for (let i in errors.errors) errorList.push(errors.errors[i].msg);
+
+      //Возвращаю на клиент сообщение ошибки
+      return res.status(400).send(errorList)
+   }
 }
 
 const registration = async (req, res) => {
 
    try {
 
-
-      /////////----ОБРАБОТЧИК ОШИБОК------///////////
-      //Получаю ошибки
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-
-         //Пустой массив куда буду складывать сообщения ошибок
-         let errorList = []
-
-         //Перебор ошибок, вытаскиваю сообщения из них и помещаю в массив
-         for (let i in errors.errors) errorList.push(errors.errors[i].msg);
-
-         //Возвращаю на клиент сообщение ошибки
-         return res.status(400).send(errorList)
-      }
-
+      errorHandler(req, res)
+      if (res.headersSent) return;
 
       const { username, password } = req.body
       const candidate = await UserSchema.findOne({ username })
@@ -46,7 +49,6 @@ const registration = async (req, res) => {
    } catch (e) {
 
       console.log(e);
-      res.status(400).json({ message: "Registration error" })
 
    }
 
@@ -54,16 +56,29 @@ const registration = async (req, res) => {
 
 const login = async (req, res) => {
 
-   const { username, password } = req.body
-   const user = await UserSchema.findOne({ username })
 
-   if (!user) return res.status(400).json({ message: `Пользователя с именем ${username} не существует` })
+   try {
+      errorHandler(req, res)
+      if (res.headersSent) return;
 
-   const isValidPassword = bcrypt.compareSync(password, user.password)
-   if (!isValidPassword) return res.status(400).json({ message: `Неправильный пароль для ${username}` })
+      const { username, password } = req.body
+      const user = await UserSchema.findOne({ username })
+      if (!username || !password) return res.status(400).json({ message: "Поля не могут быть пустыми" })
+      if (!user) return res.status(400).json({ message: `Пользователя с именем ${username} не существует` })
 
-   const token = generateToken(user._id, user.username, user.roles)
-   res.json({ token })
+      const isValidPassword = bcrypt.compareSync(password, user.password)
+      if (!isValidPassword) return res.status(400).json({ message: `Неправильный пароль для ${username}` })
+
+      const token = generateToken(user._id, user.username, user.roles)
+
+      res.json({ token })
+
+   } catch (e) {
+
+      console.log(e);
+      res.status(400).json({ message: "Registration error" })
+
+   }
 
 }
 
@@ -74,4 +89,12 @@ const getUser = async (req, res) => {
 
 }
 
-export { registration, login, getUser }
+const content = async (req, res) => {
+
+   const contentData = {
+      user: req.user,
+   }
+   res.json({ contentData })
+}
+
+export { registration, login, getUser, content }
