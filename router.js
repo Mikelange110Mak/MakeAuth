@@ -1,5 +1,5 @@
 import Router from "express";
-import { registration, login, getUser, content } from "./controllers/authController.js";
+import { registration, login, getUser, content, deleteUser } from "./controllers/authController.js";
 import { check } from "express-validator";
 
 import checkRole from "./middleware/roleMiddleware.js";
@@ -9,7 +9,6 @@ import checkAuthorization from "./middleware/authMiddleware.js";
 
 const router = new Router();
 
-router.get('/check', checkAuthorization, (req, res) => res.json({ message: req.user }))
 router.post('/login', [
    check("username", "Имя пользователя не может быть пустым").notEmpty(),
    check("username", "Пароль не может быть пустым").notEmpty(),
@@ -27,5 +26,7 @@ router.post('/registration', [
 ], registration)
 router.get('/users', checkRole(["ADMIN"]), getUser)
 router.get('/content', checkAuthorization, content)
+router.post('/delete-user', deleteUser)
+
 
 export default router

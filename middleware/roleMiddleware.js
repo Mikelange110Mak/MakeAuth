@@ -20,6 +20,9 @@ const checkRole = (acceptedRoles) => {
          });
 
          if (!validRole) return res.status(403).json({ message: `Доступ только для ${acceptedRoles}` })
+         const decodedData = jwt.verify(token, SECRET_KEY)
+         req.user = decodedData
+
          next()
 
       } catch (e) {

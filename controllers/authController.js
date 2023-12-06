@@ -85,7 +85,12 @@ const login = async (req, res) => {
 const getUser = async (req, res) => {
 
    const users = await UserSchema.find()
-   res.json({ users })
+
+   const adminData = {
+      admin: req.user,
+      users: users
+   }
+   res.json({ adminData })
 
 }
 
@@ -97,4 +102,27 @@ const content = async (req, res) => {
    res.json({ contentData })
 }
 
-export { registration, login, getUser, content }
+const deleteUser = async (req, res) => {
+
+   try {
+
+      const { username } = req.body
+      const user = await UserSchema.findOne({ username })
+
+      if (!user) return res.status(404).json({ message: "Пользователь не найден" })
+
+      await UserSchema.deleteOne({ _id: user._id })
+
+      res.json({ message: "Пользователь удален" })
+
+   } catch (e) {
+
+      console.log(e)
+      res.status(500).json({ message: "Ошибка при удалении пользователя" })
+
+   }
+
+}
+
+
+export { registration, login, getUser, content, deleteUser }
