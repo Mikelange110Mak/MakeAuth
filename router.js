@@ -26,7 +26,7 @@ router.post('/registration', [
 ], registration)
 router.get('/users', checkRole(["ADMIN"]), getUser)
 router.get('/content', checkAuthorization, content)
-router.post('/delete-user', deleteUser)
+router.delete('/delete-user', deleteUser)
 
 
 export default router
