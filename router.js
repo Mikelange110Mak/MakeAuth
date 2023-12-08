@@ -1,5 +1,5 @@
 import Router from "express";
-import { registration, login, getUser, content, deleteUser } from "./controllers/authController.js";
+import { registration, login, getUser, content, deleteUser, editUser } from "./controllers/authController.js";
 import { check } from "express-validator";
 
 import checkRole from "./middleware/roleMiddleware.js";
@@ -27,6 +27,6 @@ router.post('/registration', [
 router.get('/users', checkRole(["ADMIN"]), getUser)
 router.get('/content', checkAuthorization, content)
 router.delete('/delete-user', deleteUser)
-
+router.put('/edit', editUser)
 
 export default router

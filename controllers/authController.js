@@ -124,5 +124,16 @@ const deleteUser = async (req, res) => {
 
 }
 
+const editUser = async (req, res) => {
 
-export { registration, login, getUser, content, deleteUser }
+   const { username, newName } = req.body
+   const user = await UserSchema.findOne({ username })
+   if (!user) return res.status(404).json({ message: "Пользователь не найден" })
+   user.username = newName
+   await user.save()
+
+   res.json({ message: "Имя пользователя изменено" })
+
+}
+
+export { registration, login, getUser, content, deleteUser, editUser }
