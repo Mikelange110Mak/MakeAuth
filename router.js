@@ -27,6 +27,13 @@ router.post('/registration', [
 router.get('/users', checkRole(["ADMIN"]), getUser)
 router.get('/content', checkAuthorization, content)
 router.delete('/delete-user', deleteUser)
-router.put('/edit', editUser)
+router.put('/edit',
+   [
+      check("newName", "Имя пользователя не может быть пустым").notEmpty(),
+      check("newName", "Имя пользователя не может содержать пробелов").not().contains(' '),
+      check("newName", "Имя пользователя должно быть больше 1 символа и меньше 20").isLength({ min: 2, max: 20 }),
+      check("newName", "Имя пользователя должно быть на латиннице").not().matches(/[а-яА-Я]/)
+   ],
+   editUser)
 
 export default router

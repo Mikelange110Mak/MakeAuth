@@ -127,6 +127,11 @@ const deleteUser = async (req, res) => {
 const editUser = async (req, res) => {
 
    const { username, newName } = req.body
+
+   errorHandler(req, res)
+   if (res.headersSent) return;
+
+
    const user = await UserSchema.findOne({ username })
    if (!user) return res.status(404).json({ message: "Пользователь не найден" })
    user.username = newName
